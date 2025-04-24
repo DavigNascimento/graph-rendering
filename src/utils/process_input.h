@@ -9,6 +9,7 @@ extern glm::vec3 cameraUp;
 extern glm::vec3 cameraPos;
 
 void processInput(GLFWwindow* window, float deltaTime);
+void processInputStandard(GLFWwindow *window, float deltaTime);
 
 
 #endif // !PROCESSINPUT

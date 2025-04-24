@@ -1,22 +1,25 @@
 #include "mouse_callbacks.h"
+#include "GLFW/glfw3.h"
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
 {
     zoom -= (float)yoffset;
 
-    if (zoom >= 1.0f) // Prevent zooming too far out/in
+    if (zoom >= 1.0f)
         zoom -= yoffset;
-    if (zoom <= 1.0f) // Don't allow zoom out too far
+    if (zoom <= 1.0f)
         zoom = 1.0f;
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
 {
-    if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
+    if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
     {
-        // Reset firstMouse so we don’t jump the camera on next click
-        firstMouse = true;
-        return;
+        if (glfwGetMouseButton(window, GLFW_MOUSE_BUTTON_LEFT) != GLFW_PRESS)
+        {
+            firstMouse = true;
+            return;
+        }
     }
 
     if (firstMouse)
@@ -27,11 +30,11 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     }
 
     float xoffset = xpos - lastX;
-    float yoffset = lastY - ypos; // reversed: y ranges bottom to top
+    float yoffset = lastY - ypos;
     lastX = xpos;
     lastY = ypos;
 
-    float sensitivity = 0.1f;
+    float sensitivity = 0.2f;
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
