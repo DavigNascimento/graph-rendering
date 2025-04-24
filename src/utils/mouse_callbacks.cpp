@@ -38,15 +38,15 @@ void mouse_callback(GLFWwindow* window, double xpos, double ypos)
     xoffset *= sensitivity;
     yoffset *= sensitivity;
 
-    yaw   += xoffset;
-    pitch += yoffset;
+    vertical   += xoffset;
+    horizontal += yoffset;
 
-    if(pitch > 89.0f) pitch = 89.0f;
-    if(pitch < -89.0f) pitch = -89.0f;
+    if(horizontal > 89.0f) horizontal = 89.0f;
+    if(horizontal < -89.0f) horizontal = -89.0f;
 
     glm::vec3 front;
-    front.x = cos(glm::radians(yaw)) * cos(glm::radians(pitch));
-    front.y = sin(glm::radians(pitch));
-    front.z = sin(glm::radians(yaw)) * cos(glm::radians(pitch));
+    front.x = cos(glm::radians(vertical)) * cos(glm::radians(horizontal));
+    front.y = sin(glm::radians(horizontal));
+    front.z = sin(glm::radians(vertical)) * cos(glm::radians(horizontal));
     cameraFront = glm::normalize(front);
 }

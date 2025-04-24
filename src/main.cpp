@@ -19,14 +19,16 @@ glm::vec3 cameraUp    = glm::vec3(0.0f, 1.0f, 0.0f);
 
 float lastX = SCR_WIDTH / 2.0f;
 float lastY = SCR_HEIGHT / 2.0f;
-float yaw   = -90.0f;
-float pitch = 0.0f;
+float vertical   = -90.0f;
+float horizontal = 0.0f;
 bool firstMouse = true;
 
 float deltaTime = 0.1f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
 float zoom = 60.0f;
+
+bool cursor = true;
 
 void framebuffer_size_callback(GLFWwindow* window, int width, int height);
 
@@ -46,7 +48,7 @@ int main()
     glfwSetFramebufferSizeCallback(window, framebuffer_size_callback);
     glfwSetCursorPosCallback(window, mouse_callback);
     glfwSetScrollCallback(window, scroll_callback);
-    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 
     if (!gladLoadGLLoader((GLADloadproc)glfwGetProcAddress))
     {
@@ -112,19 +114,23 @@ int main()
         shader.setMat4("model", model);
 
         // Draw the solid cube (filled)
-        shader.setVec3("color", glm::vec3(0.2f, 0.6f, 1.0f));  // Set cube color (e.g., blue)
+        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+        shader.setVec3("color", glm::vec3(0.9f, 0.2f, 0.8f));
         glBindVertexArray(VAO);
         glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
 
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);  // Switch to wireframe mode
-        glDisable(GL_DEPTH_TEST);  // Disable depth test so edges are visible over the filled cube
+        // Draw cube triangle lines
+        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+        glDisable(GL_DEPTH_TEST);
+        shader.setVec3("color", glm::vec3(1.0f, 1.0f, 1.0f));
+        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+        
 
-        shader.setVec3("color", glm::vec3(1.0f, 1.0f, 1.0f));  // Set edges color (white)
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);  // Draw edges again
+
+
+
 
         // Reset to default state (filled rendering)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        glEnable(GL_DEPTH_TEST);
 
         if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
         {
@@ -132,10 +138,16 @@ int main()
         }
         if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
         {
-            if(glfwGetInputMode(window, GLFW_CURSOR) == GLFW_CURSOR_NORMAL)
+            if(cursor) 
+            {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                cursor = false;
+            }
             else
+            {
                 glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                cursor = true;
+            }
         }
 
 

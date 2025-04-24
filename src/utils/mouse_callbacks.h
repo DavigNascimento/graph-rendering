@@ -9,8 +9,8 @@ extern float zoom;
 extern bool firstMouse;
 extern float lastX;
 extern float lastY;
-extern float yaw;
-extern float pitch;
+extern float vertical;
+extern float horizontal;
 extern glm::vec3 cameraFront;
 
 void scroll_callback(GLFWwindow* window, double xoffset, double yoffset);
