@@ -8,6 +8,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 # Add executable
 add_executable(${PROJECT_NAME}
     src/main.cpp
+    src/utils/mouse_callbacks.cpp
+    src/utils/process_input.cpp
     # add other source files here
 )
 
