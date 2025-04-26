@@ -2,7 +2,7 @@
 
 void processInput(GLFWwindow* window, float deltaTime)
 {
-    float velocity = 2.5f * deltaTime;
+    float velocity = 10.0f * deltaTime;
 
     if (glfwGetKey(window, GLFW_KEY_W) == GLFW_PRESS)
     {

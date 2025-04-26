@@ -5,9 +5,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 
-#include "../include/shader.h" // A utility to load vertex/fragment shaders
+#include "glm/fwd.hpp"
+#include "objects/Floor.h"
+#include "objects/Objects.h"
 #include "utils/mouse_callbacks.h"
 #include "utils/process_input.h"
+#include "objects/Cube.h"
 
 unsigned int SCR_WIDTH = 1200;
 unsigned int SCR_HEIGHT = 900;
@@ -26,7 +29,7 @@ bool firstMouse = true;
 float deltaTime = 0.1f; // time between current frame and last frame
 float lastFrame = 0.0f;
 
-float zoom = 60.0f;
+float zoom = 80.0f;
 
 bool cursor = true;
 
@@ -56,39 +59,10 @@ int main()
         return -1;
     }
 
-    glEnable(GL_DEPTH_TEST);
+    Objects ObjHandler;
 
-    Shader shader("../shaders/vertex_shader.glsl", "../shaders/fragment_shader.glsl");
-
-    float vertices[] = {
-        -0.5f, -0.5f, -0.5f,  0.5f, -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  -0.5f,  0.5f, -0.5f,
-        -0.5f, -0.5f,  0.5f,  0.5f, -0.5f,  0.5f,  0.5f,  0.5f,  0.5f,  -0.5f,  0.5f,  0.5f
-    };
-
-    unsigned int indices[] = {
-        0, 1, 2, 2, 3, 0,
-        4, 5, 6, 6, 7, 4,
-        4, 7, 3, 3, 0, 4,
-        1, 5, 6, 6, 2, 1,
-        3, 2, 6, 6, 7, 3,
-        4, 5, 1, 1, 0, 4
-    };
-
-    unsigned int VBO, VAO, EBO;
-    glGenVertexArrays(1, &VAO);
-    glGenBuffers(1, &VBO);
-    glGenBuffers(1, &EBO);
-
-    glBindVertexArray(VAO);
-
-    glBindBuffer(GL_ARRAY_BUFFER, VBO);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(vertices), vertices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, EBO);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(indices), indices, GL_STATIC_DRAW);
-
-    glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 3 * sizeof(float), (void*)0);
-    glEnableVertexAttribArray(0);
+    Floor* floor = new Floor("../shaders/vertex_shader.glsl", "../shaders/fragment_shader.glsl", 50.0f, glm::vec3(cameraPos.x, 0.0f, cameraPos.z), glm::vec3(0.2f, 0.4f, 0.1f));
+    ObjHandler.add(floor);
 
     while (!glfwWindowShouldClose(window))
     {
@@ -101,55 +75,45 @@ int main()
         glClearColor(0.1f, 0.1f, 0.1f, 1.0f);
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        shader.use();
-
         glm::mat4 projection = glm::perspective(glm::radians(zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
         glm::mat4 view = glm::lookAt(cameraPos, cameraPos + cameraFront, cameraUp);
 
-        shader.setMat4("projection", projection);
-        shader.setMat4("view", view);
-
-        // Create model matrix (identity for now)
-        glm::mat4 model = glm::mat4(1.0f);
-        shader.setMat4("model", model);
-
-        // Draw the solid cube (filled)
-        glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-        shader.setVec3("color", glm::vec3(0.9f, 0.2f, 0.8f));
-        glBindVertexArray(VAO);
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-
-        // Draw cube triangle lines
-        glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
-        glDisable(GL_DEPTH_TEST);
-        shader.setVec3("color", glm::vec3(1.0f, 1.0f, 1.0f));
-        glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
-        
 
 
 
+        ObjHandler.updatePos(0, cameraPos);
+        ObjHandler.displayAll(projection, view);
 
 
-        // Reset to default state (filled rendering)
-
-        if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
+        static double lastPressTime = 0.0;
+        double currentTime = glfwGetTime();
+        if(currentTime - lastPressTime >= 0.08)
         {
-            glfwSetWindowShouldClose(window, true);
-        }
-        if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
-        {
-            if(cursor) 
+            if (glfwGetKey(window, GLFW_KEY_Q) == GLFW_PRESS)
             {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
-                cursor = false;
+                glfwSetWindowShouldClose(window, true);
             }
-            else
+            if (glfwGetKey(window, GLFW_KEY_N) == GLFW_PRESS)
             {
-                glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
-                cursor = true;
+                Cube* obj = new Cube("../shaders/vertex_shader.glsl", "../shaders/fragment_shader.glsl", 1.0f, cameraPos);
+                obj->initialize();
+                ObjHandler.add(obj);
             }
+            if (glfwGetKey(window, GLFW_KEY_M) == GLFW_PRESS)
+            {
+                if(cursor) 
+                {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
+                    cursor = false;
+                }
+                else
+                {
+                    glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_NORMAL);
+                    cursor = true;
+                }
+            }
+            lastPressTime = currentTime;
         }
-
 
 
         // Swap buffers and poll events
@@ -157,9 +121,6 @@ int main()
         glfwPollEvents();
     }
 
-    glDeleteVertexArrays(1, &VAO);
-    glDeleteBuffers(1, &VBO);
-    glDeleteBuffers(1, &EBO);
 
     glfwTerminate();
     return 0;

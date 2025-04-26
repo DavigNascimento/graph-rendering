@@ -9,6 +9,8 @@ void scroll_callback(GLFWwindow* window, double xoffset, double yoffset)
         zoom -= yoffset;
     if (zoom <= 1.0f)
         zoom = 1.0f;
+    if (zoom >= 150.0f)
+        zoom = 150.0f;
 }
 
 void mouse_callback(GLFWwindow* window, double xpos, double ypos)
